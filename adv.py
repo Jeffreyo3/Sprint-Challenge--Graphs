@@ -1,7 +1,7 @@
 from room import Room
 from player import Player
 from world import World
-from util import Stack
+from util import Stack, Queue
 
 import random
 from ast import literal_eval
@@ -29,13 +29,14 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
+opposites = {"n":"s", "e":"w", "s":"n", "w":"e"}
 
 def dft(starting_room):
     print("|||||||||||||||||||||||||||")
     s = Stack()
     visited = {}
     start_directions = starting_room.get_exits()
-    opposites = {"n":"s", "e":"w", "s":"n", "w":"e"}
+    
     print(start_directions)
 
     for d in start_directions:
@@ -125,15 +126,57 @@ def dft(starting_room):
                     
             
         print("\nVISITED", visited, "\n")
+# dft passes all small maps but fails main_maze
+# dft(player.current_room)
 
-        # print("REVERSE movements ", reverse)
-        # for r in reverse:
-        #     traversal_path.append(r)
-        #     player.travel(r)          
+def dft2(starting_room):
+    ### Keep track of how we need to 'walk back' to our forks in the road
+    reverse_path = Stack()
+    ### dictionary of the entire map
+    map = {starting_room.id: Queue(player.current_room.get_exits())}
 
 
-dft(player.current_room)
-print("PATH: ", traversal_path)
+    while len(map) < len(room_graph) - 1:
+        
+        ### if we haven't visited the room before, add to map
+        if player.current_room.id not in map:
+            exits = player.current_room.get_exits()
+            map[player.current_room.id] = Queue(exits)
+            print(map[player.current_room.id])
+            
+            ### remove the path to the room we just visited so we don't
+            # repeat unnecessary paths
+            previous_move = reverse_path.last_item()
+            map[player.current_room.id].delete(previous_move)
+                
+            
+        ### turn around if we've visited all exits
+        while map[player.current_room.id].size() < 1:
+            print("what room are you in?", player.current_room.id)
+            print(reverse_path)
+            reverse_move = reverse_path.pop()
+            traversal_path.append(reverse_move)
+            player.travel(reverse_move)
+            print(reverse_move)
+        
+        ### find which way we will move
+        print("getting move", map[player.current_room.id])
+        move = map[player.current_room.id].dequeue()
+
+        ### Save opposite direction to our reverse stack and
+        # add our movement to the taversal_path. Then move.
+        traversal_path.append(move)
+        reverse_path.push(opposites[move])
+        player.travel(move)
+
+        print(map)
+        
+
+
+
+dft2(player.current_room)
+
+print("TRAVERSAL_PATH: ", traversal_path)
 # TRAVERSAL TEST - DO NOT MODIFY
 visited_rooms = set()
 player.current_room = world.starting_room
