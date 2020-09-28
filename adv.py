@@ -129,6 +129,7 @@ def dft(starting_room):
 # dft passes all small maps but fails main_maze
 # dft(player.current_room)
 
+################# MVP #############################
 def dft2(starting_room):
     ### Keep track of how we need to 'walk back' to our forks in the road
     reverse_path = Stack()
@@ -171,9 +172,7 @@ def dft2(starting_room):
 
         print(map)
         
-
-
-
+################# MVP #############################
 dft2(player.current_room)
 
 print("TRAVERSAL_PATH: ", traversal_path)
